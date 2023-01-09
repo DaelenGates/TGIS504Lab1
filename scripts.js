@@ -1,12 +1,37 @@
-var map = L.map('map').fitWorld();
+// (OLD) 
+// var map = L.map('map').fitWorld();
 
-// adds base map 
-L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+// adds base map (OLD)
+// L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+//     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+//     maxZoom: 18,
+//     tileSize: 512,
+//     zoomOffset: -1,
+//     id: 'mapbox/streets-v11',
+//     accessToken: 'pk.eyJ1IjoiZGFlbGVuZyIsImEiOiJjbGE4MnNpbjQwMHgxM29vMG1xNXA0YjR3In0.1m-yZapuOVRg2zWL8fimbw',
+// }).addTo(map);
+
+// Light base map 
+var light = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 18,
-    id: 'mapbox/streets-v11',
+    id:'mapbox/light-v10',
     accessToken: 'pk.eyJ1IjoiZGFlbGVuZyIsImEiOiJjbGE4MnNpbjQwMHgxM29vMG1xNXA0YjR3In0.1m-yZapuOVRg2zWL8fimbw',
-}).addTo(map);
+    tileSize: 512,
+    zoomOffset: -1,
+});
+
+// dark base map 
+var dark = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id:'mapbox/dark-v10',
+    accessToken: 'pk.eyJ1IjoiZGFlbGVuZyIsImEiOiJjbGE4MnNpbjQwMHgxM29vMG1xNXA0YjR3In0.1m-yZapuOVRg2zWL8fimbw',
+    tileSize: 512,
+    zoomOffset: -1,
+});
+
+var map = L.map('map', {layers:[light]}).fitWorld();
 
 // function to put a pop up of roughly where the user is with a blue circle with the radius of where they may be based on sensor accruacy
 function onLocationFound(e) {
@@ -24,7 +49,40 @@ function onLocationFound(e) {
         else{
             L.circle(e.latlng, radius, {color: 'red'}).addTo(map);
         } //this adds a circle to the map centered at the lat and long returned by the locate function. Its radius is set to the var radius defined above.
+    
+        // uses sunCalc to get time based on JS date and lat lon 
+        var times = SunCalc.getTimes(new Date(), e.latitude, e.longitude);
+        // uses sunCalc to get sunrise horus based on getTime 
+        var sunrise = times.sunrise.getHours();
+        // uses sunCalc to get sunset horus based on getTime 
+        var sunset = times.sunset.getHours();
+        
+
+        // This var gets the current time 
+        var currentTime = new Date().getHours();
+        // if its after sundrise but before sunset make it light ... else make it dark
+        if (sunrise < currentTime && currentTime < sunset){
+            map.removeLayer(dark);
+            map.addLayer(light);
+        }
+        else {
+            map.removeLayer(light);
+            map.addLayer(dark);
+        }
 }
+
+var baseMaps = {
+    "Dark": dark,
+    "Light": light
+};
+
+// Adds dark light base map layer control 
+var layerControl = L.control.layers(baseMaps).addTo(map);
+
+L.easyButton('glyphicon-globe', function(bt, map){
+    alert('map center is at:' + map.getCenter().toString())
+    map.locate({setView: true, maxZoom: 16});
+}).addTo(map);
 
 map.on('locationfound', onLocationFound); //this is the event listener
 
