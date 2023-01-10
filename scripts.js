@@ -31,6 +31,9 @@ var dark = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?
     zoomOffset: -1,
 });
 
+// Alerts user on what they are looking at 
+alert('Welcome to my IP location finder, this website will locate where you are based on your IP and give you a radius of where you might be. you can change the background from light or dark on the top right, or recenter your map on the top left.');
+
 var map = L.map('map', {layers:[light]}).fitWorld();
 
 // function to put a pop up of roughly where the user is with a blue circle with the radius of where they may be based on sensor accruacy
