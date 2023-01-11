@@ -55,14 +55,22 @@ function onLocationFound(e) {
     
         // uses sunCalc to get time based on JS date and lat lon 
         var times = SunCalc.getTimes(new Date(), e.latitude, e.longitude);
-        // uses sunCalc to get sunrise horus based on getTime 
-        var sunrise = times.sunrise.getHours();
-        // uses sunCalc to get sunset horus based on getTime 
-        var sunset = times.sunset.getHours();
+        //  Optional work! uses sunCalc to get sunrise hours based on getTime and adds them to the sunrise minutes (get everying in only minutes)
+        var sunriseh = times.sunrise.getHours();
+        var sunrisem = times.sunrise.getMinutes();
+        var sunrise = sunriseh * 60 + sunrisem;
+        // Optional work! uses sunCalc to get sunset horus based on getTime and adds them to the sunrise mintues (get everying in only minutes)
+        var sunseth = times.sunset.getHours();
+        var sunsetm = times.sunset.getMinutes();
+        var sunset = sunseth * 60 + sunsetm;
         
 
-        // This var gets the current time 
-        var currentTime = new Date().getHours();
+        // This var gets the current time in hours and minutes and adds them together
+        var currentTimeh = new Date().getHours();
+        var currentTimem = new Date().getMinutes();
+        var currentTime = currentTimeh * 60 + currentTimem;
+        console.log(sunrise, sunset, currentTime);
+
         // if its after sundrise but before sunset make it light ... else make it dark
         if (sunrise < currentTime && currentTime < sunset){
             map.removeLayer(dark);
